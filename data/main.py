@@ -39,6 +39,7 @@ class SyntheticDatasetGenerator:
         return str(uuid.uuid4())
 
     def random_past_date(self, days=365):
+
         return (
             datetime.utcnow() -
             timedelta(
@@ -49,7 +50,7 @@ class SyntheticDatasetGenerator:
         ).isoformat()
 
     # -------------------------------------------------
-    # GENERATION
+    # ROLES
     # -------------------------------------------------
 
     def generate_roles(self):
@@ -69,6 +70,10 @@ class SyntheticDatasetGenerator:
                 "name": role
             })
 
+    # -------------------------------------------------
+    # CUSTOMERS
+    # -------------------------------------------------
+
     def generate_customers(self):
 
         customers = [
@@ -76,7 +81,7 @@ class SyntheticDatasetGenerator:
             "Alaska Airlines",
             "United Airlines",
             "American Airlines",
-            "Southwest Airlines",
+            "Southwest Airlines"
         ]
 
         for customer in customers:
@@ -88,10 +93,13 @@ class SyntheticDatasetGenerator:
                 "sla_tier": random.randint(1, 3)
             })
 
-    def generate_users(self, users_per_customer=5):
+    # -------------------------------------------------
+    # USERS
+    # -------------------------------------------------
+
+    def generate_users(self, users_per_customer=10):
 
         role_ids = [r["id"] for r in self.data["roles"]]
-        customer_ids = [c["id"] for c in self.data["customers"]]
 
         for customer in self.data["customers"]:
 
@@ -108,8 +116,14 @@ class SyntheticDatasetGenerator:
                     "created_at": self.random_past_date(900)
                 })
 
+    # -------------------------------------------------
+    # SITES
+    # -------------------------------------------------
+
     def generate_sites(self):
+
         AIRLINE_HUBS = {
+
             "Delta Airlines": [
                 ("Atlanta", "GA"),
                 ("Detroit", "MI"),
@@ -125,6 +139,18 @@ class SyntheticDatasetGenerator:
                 ("Chicago", "IL"),
                 ("Denver", "CO"),
                 ("Houston", "TX")
+            ],
+
+            "American Airlines": [
+                ("Dallas", "TX"),
+                ("Charlotte", "NC"),
+                ("Phoenix", "AZ")
+            ],
+
+            "Southwest Airlines": [
+                ("Dallas", "TX"),
+                ("Las Vegas", "NV"),
+                ("Denver", "CO")
             ]
         }
 
@@ -143,33 +169,55 @@ class SyntheticDatasetGenerator:
                     "country": "USA"
                 })
 
-    def generate_parts(self, count=150):
+    # -------------------------------------------------
+    # PARTS
+    # -------------------------------------------------
 
-        criticalities = [
-            "low",
-            "medium",
-            "high",
-            "critical"
+    def generate_parts(self):
+
+        PART_CATALOG = [
+
+            ("Hydraulic Pump", "critical"),
+            ("Fuel Nozzle", "high"),
+            ("Brake Assembly", "critical"),
+            ("Turbofan Blade", "critical"),
+            ("Navigation Computer", "high"),
+            ("Pressure Valve", "medium"),
+            ("Landing Gear Actuator", "critical"),
+            ("Cabin Pressure Sensor", "medium"),
+            ("Oil Filter", "low"),
+            ("Avionics Control Unit", "high"),
+            ("Cooling Fan", "medium"),
+            ("Ignition Module", "high"),
+            ("Hydraulic Seal", "medium"),
+            ("Engine Bearing", "critical"),
+            ("Fuel Pump", "high")
         ]
 
-        for i in range(count):
+        for i, (part_name, criticality) in enumerate(PART_CATALOG):
 
             self.data["parts"].append({
                 "id": self.uuid(),
-                "part_number": f"PN-{100000 + i}",
-                "description": fake.catch_phrase(),
-                "unit_cost": round(random.uniform(50, 10000), 2),
-                "criticality": random.choice(criticalities),
-                "lead_time_days": random.randint(1, 120)
+                "part_number": f"AV-{100000 + i}",
+                "description": part_name,
+                "unit_cost": round(random.uniform(500, 50000), 2),
+                "criticality": criticality,
+                "lead_time_days": random.randint(2, 180)
             })
+
+    # -------------------------------------------------
+    # INVENTORY
+    # -------------------------------------------------
 
     def generate_inventory(self):
 
         warehouses = [
-            "Seattle DC",
-            "Dallas DC",
-            "Chicago DC",
-            "Atlanta DC"
+            "SEA Parts Depot",
+            "ATL Maintenance Storage",
+            "ORD Inventory Center",
+            "DFW Logistics Hub",
+            "DEN Aircraft Supply",
+            "PHX Aviation Warehouse"
         ]
 
         for part in self.data["parts"]:
@@ -178,19 +226,23 @@ class SyntheticDatasetGenerator:
                 "id": self.uuid(),
                 "part_id": part["id"],
                 "warehouse_name": random.choice(warehouses),
-                "quantity_on_hand": random.randint(20, 500),
+                "quantity_on_hand": random.randint(5, 250),
                 "quantity_reserved": random.randint(0, 50),
-                "reorder_point": random.randint(10, 100)
+                "reorder_point": random.randint(5, 40)
             })
 
-    def generate_assets(self, assets_per_site=20):
+    # -------------------------------------------------
+    # ASSETS
+    # -------------------------------------------------
 
-        models = [
-            "GTX-900 Turbine",
-            "Atlas Compressor",
-            "Hydra Pump",
-            "Titan Conveyor",
-            "Nova Generator"
+    def generate_assets(self, assets_per_site=15):
+
+        aircraft_models = [
+            "Boeing 737 MAX",
+            "Airbus A320",
+            "Boeing 787",
+            "Airbus A220",
+            "Embraer E175"
         ]
 
         for site in self.data["sites"]:
@@ -200,18 +252,22 @@ class SyntheticDatasetGenerator:
                 self.data["assets"].append({
                     "id": self.uuid(),
                     "site_id": site["id"],
-                    "serial_number": f"SN-{uuid.uuid4().hex[:10].upper()}",
-                    "model": random.choice(models),
+                    "serial_number": f"AC-{uuid.uuid4().hex[:10].upper()}",
+                    "model": random.choice(aircraft_models),
                     "status": random.choice([
-                        "running",
+                        "active",
                         "maintenance",
-                        "offline"
+                        "grounded"
                     ]),
-                    "health_score": random.randint(40, 100),
-                    "runtime_hours": random.randint(1000, 50000)
+                    "health_score": random.randint(55, 100),
+                    "runtime_hours": random.randint(5000, 75000)
                 })
 
-    def generate_work_orders(self, work_orders_per_asset=5):
+    # -------------------------------------------------
+    # WORK ORDERS
+    # -------------------------------------------------
+
+    def generate_work_orders(self, work_orders_per_asset=6):
 
         priorities = [
             "low",
@@ -227,11 +283,12 @@ class SyntheticDatasetGenerator:
         ]
 
         issue_types = [
-            "overheating",
-            "vibration",
-            "seal_failure",
-            "bearing_failure",
-            "electrical_fault"
+            "engine_vibration",
+            "hydraulic_leak",
+            "avionics_fault",
+            "landing_gear_issue",
+            "oil_pressure_warning",
+            "temperature_alarm"
         ]
 
         for asset in self.data["assets"]:
@@ -247,7 +304,7 @@ class SyntheticDatasetGenerator:
                 )
 
                 finished_at = started_at + timedelta(
-                    hours=random.randint(2, 72)
+                    hours=random.randint(2, 96)
                 )
 
                 self.data["work_orders"].append({
@@ -261,6 +318,10 @@ class SyntheticDatasetGenerator:
                     "finished_at": finished_at.isoformat()
                 })
 
+    # -------------------------------------------------
+    # ASSIGNMENTS
+    # -------------------------------------------------
+
     def generate_assignments(self):
 
         user_ids = [u["id"] for u in self.data["users"]]
@@ -273,6 +334,10 @@ class SyntheticDatasetGenerator:
                 "user_id": random.choice(user_ids),
                 "assigned_at": wo["created_at"]
             })
+
+    # -------------------------------------------------
+    # FAILURES / HISTORY / REFURBISHMENTS
+    # -------------------------------------------------
 
     def generate_work_order_parts_and_failures(self):
 
@@ -316,7 +381,6 @@ class SyntheticDatasetGenerator:
 
             for part_id in selected_parts:
 
-                # WORK ORDER PARTS
                 self.data["work_order_parts"].append({
                     "id": self.uuid(),
                     "work_order_id": wo["id"],
@@ -325,7 +389,6 @@ class SyntheticDatasetGenerator:
                     "consumed_at": wo["finished_at"]
                 })
 
-                # COMPONENT FAILURES
                 self.data["component_failures"].append({
                     "id": self.uuid(),
                     "asset_id": wo["asset_id"],
@@ -336,7 +399,6 @@ class SyntheticDatasetGenerator:
                     "severity": random.choice(severities)
                 })
 
-                # COMPONENT HISTORY
                 self.data["asset_component_history"].append({
                     "id": self.uuid(),
                     "asset_id": wo["asset_id"],
@@ -351,7 +413,6 @@ class SyntheticDatasetGenerator:
                     "position": f"Slot-{random.randint(1, 12)}"
                 })
 
-                # REFURBISHMENTS
                 if random.random() < 0.35:
 
                     completed_at = (
@@ -374,7 +435,7 @@ class SyntheticDatasetGenerator:
                     })
 
     # -------------------------------------------------
-    # MASTER GENERATOR
+    # MASTER
     # -------------------------------------------------
 
     def generate_all(self):
@@ -395,7 +456,6 @@ class SyntheticDatasetGenerator:
     # -------------------------------------------------
 
     def export_json(self, filename='synthetic_data.json'):
-        """Export all data to JSON file"""
 
         with open(filename, 'w') as f:
             json.dump(self.data, f, indent=2)
@@ -403,7 +463,6 @@ class SyntheticDatasetGenerator:
         print(f"Data exported to {filename}")
 
     def export_sql_inserts(self, filename='synthetic_data.sql'):
-        """Export data as SQL INSERT statements"""
 
         def sql_value(v):
 
@@ -440,6 +499,7 @@ class SyntheticDatasetGenerator:
                     )
 
         print(f"SQL exported to {filename}")
+
 
 # -------------------------------------------------
 # RUN
