@@ -1,1 +1,8 @@
-# ...existing code from analytics/repositories/work_orders_repository.py...
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from app.models.work_orders import WorkOrder
+
+class WorkOrdersRepository:
+    # def get_total_work_orders(self, db: Session) -> int:
+    #     total = db.query(func.count(WorkOrder.id)).scalar()
+    #     return total or 0
