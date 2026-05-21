@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.analytics.api import dashboard
-from app.analytics.api import work_orders
-from app.analytics.api import inventory
+from app.api import dashboard
+from app.api import work_orders
+from app.api import inventory
+from app.api import assets
 
 app = FastAPI(
     title="PartLink API",
@@ -36,17 +37,17 @@ app.add_middleware(
 #     tags=["Dashboard"]
 # )
 
-app.include_router(
-    inventory.router,
-    prefix="/analytics/inventory",
-    tags=["Inventory Analytics"]
-)
-
 # app.include_router(
-#     assets.router,
-#     prefix="/analytics/assets",
-#     tags=["Asset Analytics"]
+#     inventory.router,
+#     prefix="/analytics/inventory",
+#     tags=["Inventory Analytics"]
 # )
+
+app.include_router(
+    assets.router,
+    prefix="/analytics/assets",
+    tags=["Asset Analytics"]
+)
 
 app.include_router(
     work_orders.router,

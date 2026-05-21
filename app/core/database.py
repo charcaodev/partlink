@@ -1,10 +1,25 @@
+import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
 
-DATABASE_URL = "postgresql://postgres:password@localhost:5432/partlink"
+# -------------------------
+# Load environment variables
+# -------------------------
+load_dotenv()
 
-engine = create_engine(DATABASE_URL)
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is not set in environment variables")
+
+# -------------------------
+# SQLAlchemy setup
+# -------------------------
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,  # avoids stale connections
+)
 
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -14,10 +29,11 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 
-
+# -------------------------
+# Dependency for FastAPI
+# -------------------------
 def get_db():
     db = SessionLocal()
-
     try:
         yield db
     finally:

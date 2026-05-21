@@ -15,4 +15,4 @@ class Asset(Base):
     model = Column(String, nullable=False)
     status = Column(String, nullable=False)
     health_score = Column(Integer, nullable=False, default=100)
-    runtime_hours = Column(DateTime(timezone=True), nullable=False, default=0)
+    runtime_hours = Column(Integer, nullable=False, default=0)

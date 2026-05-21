@@ -1,14 +1,19 @@
 from app.schemas.work_orders import WorkOrderSummaryResponse, MonthlyWorkOrdersResponse, MonthlyWorkOrderData
 
+from app.repositories.work_orders_repository import WorkOrdersRepository
+
 class WorkOrderService:
+    def __init__(self):
+        self.repository = WorkOrdersRepository()
+
     def get_summary(self) -> WorkOrderSummaryResponse:
-        # MOCK DATA
-        # later this comes from repository/database
+        summary = self.repository.get_work_orders_summary()
         return WorkOrderSummaryResponse(
-            open_work_orders=214,
-            closed_work_orders=1820,
-            avg_repair_time_hours=6.4
+            total_work_orders=summary["total_work_orders"],
+            open_work_orders=summary["open_work_orders"],
+            closed_work_orders=summary["closed_work_orders"]
         )
+
     def get_monthly_work_orders(self) -> MonthlyWorkOrdersResponse:
         monthly_data = [
             MonthlyWorkOrderData(month="2026-01", count=523),
